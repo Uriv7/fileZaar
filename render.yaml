@@ -1,0 +1,25 @@
+# ═══════════════════════════════════════════════════════════
+#  FileZaar — Render.com deployment (Zero Storage)
+#  NO disk mount needed — files processed in RAM only
+# ═══════════════════════════════════════════════════════════
+services:
+  - type: web
+    name: filezaar-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: starter          # $7/mo
+    region: oregon
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: CORS_ORIGINS
+        value: https://filezaar.pages.dev
+      - key: MAX_CONCURRENT_JOBS
+        value: 2
+      - key: MAX_UPLOAD_MB
+        value: 200
+      - key: CONVERSION_TIMEOUT
+        value: 18
+      # No DISK mount — zero storage, everything in RAM

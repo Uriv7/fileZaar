@@ -1,0 +1,85 @@
+# ═══════════════════════════════════════════════════════════
+#  FileZaar — Docker Compose (Production)
+#  Stack: nginx → backend (x3) + redis + frontend CDN
+# ═══════════════════════════════════════════════════════════
+version: '3.9'
+
+services:
+
+  # ── NGINX reverse proxy + rate limiter ────────────────────
+  nginx:
+    image: nginx:1.25-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - fz_net
+
+  # ── Backend (3 replicas for concurrency) ──────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    environment:
+      - PORT=8000
+      - REDIS_URL=redis://redis:6379/0
+      - MAX_UPLOAD_MB=2048
+      - MAX_CONCURRENT_JOBS=4
+      - OUTPUT_TTL_SECONDS=3600
+      - CORS_ORIGINS=${CORS_ORIGINS:-https://filezaar.pages.dev}
+    volumes:
+      - uploads:/app/tmp/uploads
+      - outputs:/app/tmp/outputs
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - fz_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ── Redis (job state, rate limiting, output cache) ────────
+  redis:
+    image: redis:7.2-alpine
+    command: redis-server --save 20 1 --loglevel warning --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - fz_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  uploads:
+  outputs:
+  redis_data:
+  nginx_logs:
+
+networks:
+  fz_net:
+    driver: bridge

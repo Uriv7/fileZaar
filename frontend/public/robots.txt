@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Allow: /convert/
+
+Disallow: /api/
+Disallow: /tmp/
+
+Sitemap: https://filezaar.com/sitemap.xml

@@ -1,0 +1,42 @@
+# FileZaar Backend — Production Requirements
+
+# ── Server ────────────────────────────────────────────────────────────────────
+fastapi==0.115.12
+uvicorn[standard]==0.34.2
+python-multipart==0.0.20
+
+# ── Image Processing ──────────────────────────────────────────────────────────
+Pillow>=10.4.0
+pillow-heif>=0.16.0        # HEIC/iPhone photos
+cairosvg>=2.7.1             # SVG conversion
+
+# ── Document Processing ───────────────────────────────────────────────────────
+pypdf>=4.2.0                # PDF reading — fixes 'PdfReader not defined'
+pypdfium2>=4.30.0           # PDF page rendering to images (PDF→DOCX with images)
+python-docx>=1.1.0          # DOCX read/write
+mammoth>=1.6.0              # DOCX → HTML
+Markdown>=3.6               # Markdown → HTML
+Pygments>=2.18.0            # Syntax highlighting
+reportlab>=4.2.0            # PDF generation
+weasyprint>=62.0            # HTML → PDF
+pdfminer.six>=20221105      # PDF text extraction fallback
+
+# ── Spreadsheet / Presentation ────────────────────────────────────────────────
+openpyxl>=3.1.0             # XLSX read/write
+python-pptx>=0.6.21         # PPTX read/write
+
+# ── Archives ──────────────────────────────────────────────────────────────────
+py7zr>=0.21.0               # 7Z archives
+rarfile>=4.1                # RAR archives
+
+# ── Utilities ─────────────────────────────────────────────────────────────────
+aiofiles>=23.2.1
+httpx>=0.27.0
+# ── Additional (added by optimisation pass) ──────────────────────────────────
+pdf2docx>=0.5.8              # Better PDF→DOCX layout reconstruction
+
+# ── Production optimisations ──────────────────────────────────────────────────
+slowapi>=0.1.9              # Per-IP rate limiting
+uvloop>=0.19.0             # 2x faster event loop (Linux only)
+httptools>=0.6.1           # Faster HTTP parsing for uvicorn
+sentry-sdk[fastapi]>=2.0   # Error tracking (set SENTRY_DSN env var)

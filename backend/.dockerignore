@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+
+# Dev files
+*.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+
+# Test data
+tests/
+test_*
+
+# Local temp dirs (created at runtime)
+tmp/
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*
+
+# Docs
+*.md
+!README.md
+
+# Git
+.git/
+.gitignore
+
+# Editor
+.vscode/
+.idea/
+*.swp
